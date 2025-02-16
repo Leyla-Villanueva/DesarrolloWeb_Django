@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrarse</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="container mt-2">
+    <h2 class="text-center">Registrate</h2>
+    <form method="post" onsubmit="return validateForm()" class="border p-4 rounded shadow-sm bg-light" novalidate>
+        {% csrf_token %}
+        {{ form.as_p }} <!-- esto lo mete todo en etiquetas <p> -->
+        <button type="submit" class="btn btn-primary w-100">Registrarse</button>
+    </form>
+
+        <script>
+            function validateForm() {
+                let email = document.getElementById("id_email").value;
+                let controlNumber = document.getElementById("id_control_number").value;
+                let phone = document.getElementById("id_tel").value;
+                let pass1 = document.getElementById("id_password1").value;
+                let pass2 = document.getElementById("id_password2").value;
+
+                let regexEmail = /^[a-zA-Z0-9._%+-]+@utez\.edu\.mx$/;
+                let regexControlNumber = /^[0-9]{5}[a-zA-Z]{2}[0-9]{3}$/;
+                let regexPhone = /^[0-9]{10,}$/;
+                let regexPassword = /^(?=.*\d)(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}$/;
+    
+                if (!regexEmail.test(email)) {
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'El correo debe ser del dominio @utez.edu.mx',
+                    icon: 'error',
+                    confirmButtonText: 'Ok'
+                });
+                return false;
+                }
+
+                if (!regexControlNumber.test(controlNumber)) {
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'El número de control debe seguir el formato',
+                    icon: 'error',
+                    confirmButtonText: 'Ok'
+                });
+                return false;
+                }
+
+                if (!regexPhone.test(phone)) {
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'El teléfono debe contener al menos 10 dígitos',
+                    icon: 'error',
+                    confirmButtonText: 'Ok'
+                });
+                return false;
+                }
+
+                
+                if (pass1.length < 8) {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Tu contraseña tiene menos de 8 caracteres',
+                        icon: 'error',
+                        confirmButtonText: 'Ok'
+                    });
+                    return false;
+                }
+    
+                if (!regexPassword.test(pass1)) {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'La contraseña debe contener al menos 1 número, 1 letra mayúscula y 1 carácter especial (!@#$%^&*).',
+                        icon: 'error',
+                        confirmButtonText: 'Ok'
+                    });
+                    return false;
+                }
+    
+                if (pass1 !== pass2) {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Las contraseñas no coinciden.',
+                        icon: 'error',
+                        confirmButtonText: 'Ok'
+                    });
+                    return false;
+                }
+    
+                return true;
+            }
+        </script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+            {% include 'mensaje.html' %}
+    </body>
+    </html>
