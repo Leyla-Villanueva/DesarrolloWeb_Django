@@ -31,3 +31,31 @@ def lista_productos(request):
 
 def ver_productos(request):
     return render(request, 'ver.html')
+
+import json
+
+def registrar_producto(request):
+    # checar si nuestra request es de tipo post
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body) # texto json
+            producto = Producto.objects.create(
+                nombre=data['nombre'],
+                precio=data['precio'],
+                imagen=data['imagen']
+            ) #create directamente mete el objeto en la BD
+            return JsonResponse(
+                {
+                    'mensaje':'registro exitoso',
+                    'id':producto.id
+                },status=201
+            )
+        except Exception as e:
+            print(str(e))
+            return JsonResponse(
+                {'error':str(e)}, status = 400
+            )
+    #si no es post el request
+    return JsonResponse(
+        {'error':'El metodo no esta soportado'}, status=405
+    )
