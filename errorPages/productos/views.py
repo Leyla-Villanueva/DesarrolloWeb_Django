@@ -20,6 +20,7 @@ def lista_productos(request):
     
     data = [
         {
+            'id':p.id,
             'nombre': p.nombre,
             'precio': p.precio,
             'imagen': p.imagen
@@ -59,3 +60,42 @@ def registrar_producto(request):
     return JsonResponse(
         {'error':'El metodo no esta soportado'}, status=405
     )
+
+from django.shortcuts import get_object_or_404
+#funciones para el metodo PUT
+def actualizar_producto(request,id_producto):
+    if request.method == 'PUT':
+        producto = get_object_or_404(Producto, id=id_producto)
+        try:
+            #la informacion de la modifciacion viene del body del request
+            data = json.loads(request.body)
+            producto.nombre = data.get('nombre', producto.nombre)
+            producto.precio = data.get('precio', producto.precio)
+            producto.imagen = data.get('imagen', producto.imagen)
+            producto.save()
+            return JsonResponse({'mensaje' : 'Producto actualizado correctamente'}, status = 200)
+        except Exception as e:
+            return JsonResponse({'error':str(e)}, status = 400)
+    return JsonResponse({'error':'Metodo no es PUT'}, status = 405)
+
+#Funciones para el Delete
+def borrar_producto(request,id_producto):
+    if request.method == 'DELETE':
+        producto = get_object_or_404(Producto, id=id_producto)
+        producto.delete()
+        return JsonResponse({'mensaje': 'Producto eliminado correctamente'}, status = 200)
+    return JsonResponse({'mensaje':'El metodo no es DELETE'}, status = 405)
+
+#Funcion adicional para un producto en especifico
+def obtener_producto(request,id_producto):
+    if request.method == 'GET':
+        producto = get_object_or_404(Producto, id=id_producto)
+        data = {
+            "id": producto_id,
+            "nombre" : producto.nombre,
+            "precio": producto.precio,
+            "imagen": producto.imagen
+        }
+        return JsonResponse(data, status = 200)
+    return JsonResponse({'mensaje':'El metodo no es GET'}, status = 405)
+    
