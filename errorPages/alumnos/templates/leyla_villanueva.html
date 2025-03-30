@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Alumnos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div class="container mt-3">
+        <div class="row">
+            <div class="col-md-6">
+                <h3>Formulario De Alumno</h3>
+                <form id="alumnoForm">
+                    <input type="hidden" id="alumnoId">
+                    <!-- 
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre</label>
+                        <input type="text" id="nombre" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="apellido" class="form-label">Apellido</label>
+                        <input type="text" id="apellido" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edad" class="form-label">Edad</label>
+                        <input type="number" id="edad" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="matricula" class="form-label">Matrícula</label>
+                        <input type="text" id="matricula" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Correo</label>
+                        <input type="email" id="email" class="form-control" required>
+                    </div> 
+                --> 
+                    {{form.as_p}}
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </form>
+            </div>
+            <div class="col-md-6">
+                <h3>Lista de alumnos</h3>
+                <ul id="listaAlumnos" class="list-group"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            cargarAlumnos();
+            document.getElementById("alumnoForm").addEventListener("submit", guardarAlumno);
+        });
+
+        async function cargarAlumnos() {
+            const response = await fetch("http://127.0.0.1:8000/alumnos/api/");
+            const alumnos = await response.json();
+            const lista = document.getElementById("listaAlumnos");
+            lista.innerHTML = "";
+            alumnos.forEach(alumno => {
+                lista.innerHTML += `<li class="list-group-item d-flex justify-content-between align-items-center">
+                    ${alumno.nombre} ${alumno.apellido} - ${alumno.edad} años - ${alumno.matricula} - ${alumno.email}            
+                    <span>
+                        <button onclick="editarAlumno(${alumno.id}, '${alumno.nombre}', '${alumno.apellido}', ${alumno.edad}, '${alumno.matricula}', '${alumno.email}')" class="btn btn-sm btn-warning">✏️</button>
+                        <button onclick="eliminarAlumno(${alumno.id})" class="btn btn-sm btn-danger">🗑️</button>
+                    </span>
+                </li>`;
+            });
+        }
+
+        async function guardarAlumno(event) {
+            event.preventDefault();
+            const id = document.getElementById("alumnoId").value;
+            const method = id ? "PUT" : "POST";
+            const url = "http://127.0.0.1:8000/alumnos/api/" + (id ? id + "/" : "");
+            
+            const datos = {
+                nombre: document.getElementById("id_nombre").value,
+                apellido: document.getElementById("id_apellido").value,
+                edad: document.getElementById("id_edad").value,
+                matricula: document.getElementById("id_matricula").value,
+                email: document.getElementById("id_email").value
+            };
+
+            const response = await fetch(url, {
+                method: method,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(datos)
+            });
+
+            if (response.ok) {
+                Swal.fire({
+                    icon: 'success',
+                    title: id ? 'Alumno actualizado' : 'Alumno guardado',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+                document.getElementById("alumnoForm").reset();
+                document.getElementById("alumnoId").value = "";
+                cargarAlumnos();
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error al guardar',
+                    text: 'Revisa los datos e intenta nuevamente.'
+                });
+            }
+        }
+
+        function editarAlumno(id, nombre, apellido, edad, matricula, email) {
+            document.getElementById("alumnoId").value = id;
+            document.getElementById("id_nombre").value = nombre;
+            document.getElementById("id_apellido").value = apellido;
+            document.getElementById("id_edad").value = edad;
+            document.getElementById("id_matricula").value = matricula;
+            document.getElementById("id_email").value = email;
+        }
+
+        async function eliminarAlumno(id) {
+            Swal.fire({
+                title: "¿Estás seguro?",
+                text: "Esta acción no se puede deshacer.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Sí, eliminar",
+                cancelButtonText: "Cancelar"
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    const response = await fetch("http://127.0.0.1:8000/alumnos/api/" + id + "/", {
+                        method: "DELETE"
+                    });
+
+                    if (response.ok) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Alumno eliminado",
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                        cargarAlumnos();
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Error al eliminar",
+                            text: "No se pudo eliminar el alumno."
+                        });
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
