@@ -26,7 +26,7 @@ const Navbar = ({ sesion }) => {
     <nav className="navbar navbar-expand-lg navbar-light bg-light">
       <div className="container">
         <Link className="navbar-brand" to="/">
-          Mi Aplicación
+          App django
         </Link>
         <button
           className="navbar-toggler"
